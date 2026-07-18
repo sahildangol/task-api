@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 
 WORKDIR /app
 RUN corepack enable
@@ -6,7 +6,7 @@ RUN corepack enable
 FROM base AS build
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --ignore-scripts
 
 COPY tsconfig.json prisma.config.ts ./
 COPY prisma ./prisma
@@ -24,7 +24,7 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 COPY --chown=appuser:appgroup package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile --shamefully-hoist
+RUN pnpm install --prod --shamefully-hoist --ignore-scripts
 
 COPY --chown=appuser:appgroup prisma.config.ts ./prisma.config.ts
 COPY --chown=appuser:appgroup docker-entrypoint.sh ./docker-entrypoint.sh

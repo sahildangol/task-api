@@ -4,12 +4,12 @@ import { AppError } from "../utils/AppError";
 import { config } from "../config/env";
 
 export const globalErrorHandler = (
-  err: unknown,
+  err: any,
   _req: Request,
   res: Response,
   _next: NextFunction,
 ) => {
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+  if (err && typeof err === "object" && "code" in err) {
     if (err.code === "P2002") {
       return res.status(409).json({
         success: false,
