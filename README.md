@@ -10,7 +10,8 @@ A Task Management API built with **Node.js**, **Express**, **Prisma**, **TypeScr
 - **Input Validation** — Zod schemas with `.strict()` rejecting unknown keys; `.refine()` rejecting empty PATCH body
 - **Prisma Migrations** — declarative schema with `prisma migrate deploy` (not `db push`)
 - **Structured Error Responses** — Prisma error codes mapped to HTTP statuses (P2002→409, P2025→404); generic 500s sanitized to `"Internal server error"`
-- **Docker Postgres** — PostgreSQL runs in a Docker container
+- **Security Hardened** — `helmet`, strictly bound `cors` middleware, and `express-rate-limit` to protect auth endpoints.
+- **Docker PostgreSQL & API** — Run everything beautifully from a single `docker compose up` command.
 
 ## Tech Stack
 
@@ -21,78 +22,60 @@ A Task Management API built with **Node.js**, **Express**, **Prisma**, **TypeScr
 | Language     | TypeScript                                              |
 | ORM          | Prisma 7 (with `@prisma/adapter-pg` driver adapter)    |
 | Validation   | Zod                                                     |
+| Security     | Helmet, Express Rate Limit, CORS                        |
 | Auth         | JSON Web Tokens (`jsonwebtoken`)                        |
 | Database     | PostgreSQL 15 (via Docker)                              |
-| Dev Runner   | `ts-node-dev`                                           |
-
-## Prerequisites
-
-- Node.js >= 18
-- pnpm
-- Docker Desktop
 
 ## Setup
 
-1. **Clone & install**
+### Quick Start (Docker)
+This is the primary way to run the application for production or review.
 
+1. **Configure Environment Variables**
+   ```bash
+   cp .env.sample .env
+   ```
+   *Edit `.env` and provide a secure value for `JWT_SECRET`.*
+
+2. **Build and Start**
+   ```bash
+   docker compose up -d --build
+   ```
+   *This command will automatically spin up PostgreSQL, wait for it to become healthy, run database migrations, seed the database, and start the compiled API.*
+
+3. **Verify**
+   Check that the server is alive and well:
+   http://localhost:5000/health
+
+### Local Development
+For active coding with hot-reload and local database connections.
+
+1. **Install dependencies**
    ```bash
    pnpm install
    ```
 
-2. **Environment variables**
-
-   Copy `.env.sample` to `.env` and fill in values:
-
+2. **Configure Environment Variables**
    ```bash
    cp .env.sample .env
    ```
+   *Edit `.env` and ensure `DATABASE_URL` is pointing to `localhost` (e.g. `postgresql://postgres:your_password@localhost:5432/task_manager_db`).*
 
-   **Required:**
-
-   | Variable       | Description                         |
-   | -------------- | ----------------------------------- |
-   | `DATABASE_URL` | PostgreSQL connection string        |
-   | `JWT_SECRET`   | Secret key for signing JWT tokens   |
-
-   **Optional:**
-
-   | Variable         | Default | Description              |
-   | ---------------- | ------- | ------------------------ |
-   | `PORT`           | `5000`  | Server port              |
-   | `JWT_EXPIRES_IN` | `1h`    | Token expiration duration |
-   | `NODE_ENV`       | `development` | Environment mode     |
-
-   > The server will **fail to start** if `JWT_SECRET` is not set.
-
-3. **Start PostgreSQL**
-
+3. **Start Local PostgreSQL**
    ```bash
    docker compose up -d db
    ```
 
-4. **Run migrations**
-
+4. **Run migrations & seed**
    ```bash
    pnpm prisma:migrate:deploy
-   ```
-
-5. **Seed the database**
-
-   ```bash
    pnpm db:seed
    ```
 
-   Default seeded user:
-   - **Email:** `admin@example.com`
-   - **Password:** `password123`
-
-6. **Start the dev server**
-
+5. **Start the dev server**
    ```bash
    pnpm dev
    ```
-
-   Server starts at `http://localhost:5000`.
 
 ## API Reference
 
@@ -189,7 +172,7 @@ If you modify `prisma/schema.prisma`:
 
 ## Project Structure
 
-```
+```text
 task-api/
 ├── prisma/
 │   ├── schema.prisma      # Data model
@@ -228,14 +211,4 @@ task-api/
 ├── Dockerfile              # Production build
 ├── docker-entrypoint.sh    # Container entrypoint
 └── package.json
-```
-
-## Docker (Production Build)
-
-```bash
-# Build and run everything
-JWT_SECRET=your_secret docker compose up --build
-
-# Or run just the database
-docker compose up -d db
 ```
