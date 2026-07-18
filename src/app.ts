@@ -1,0 +1,27 @@
+import express, { Application, NextFunction, Request, Response } from "express";
+import cors from "cors";
+import authRoutes from "./routes/auth.routes";
+import taskRoutes from "./routes/task.routes";
+import { globalErrorHandler } from "./middleware/error.middleware";
+import { AppError } from "./utils/AppError";
+
+const app: Application = express();
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.get("/health", (req: Request, res: Response) => {
+  res.json({ status: "ok" });
+});
+
+app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
+
+app.all("/{*path}", (req: Request, res: Response, next: NextFunction) => {
+  next(new AppError(`Route ${req.originalUrl} not found`, 404));
+});
+
+app.use(globalErrorHandler);
+
+export default app;

@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.env.*
+!.env.sample
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

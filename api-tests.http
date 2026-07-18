@@ -1,0 +1,206 @@
+### AUTHENTICATION ###
+
+### Register a new user
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123",
+  "name": "John Doe"
+}
+
+### Register with duplicate email (expect 409)
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123",
+  "name": "John Doe Again"
+}
+
+### Register with missing name (expect 400)
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "bad@example.com",
+  "password": "password123"
+}
+
+### Login
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+### Login wrong password (expect 401)
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "wrongpassword"
+}
+
+### Login with missing fields (expect 400)
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{}
+
+### Create a second user (for cross-user tests)
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "password123",
+  "name": "Jane Doe"
+}
+
+### Login as second user
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "password123"
+}
+
+### TASKS (Requires Bearer Token) ###
+### =================================
+### IMPORTANT: Replace {{authToken}} below with a real token from the Login response above.
+### In VS Code REST Client you can use @variableName for this. But for simplicity,
+### copy the token from the login response and paste it below directly.
+### =================================
+
+### Set auth token variable (paste your token here)
+@authToken = <your_jwt_token_here>
+
+### Create a task
+POST http://localhost:5000/api/tasks
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Complete project report",
+  "description": "Write the quarterly project report for stakeholders"
+}
+
+### Create task without description
+POST http://localhost:5000/api/tasks
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Buy groceries"
+}
+
+### Create task with empty title (expect 400)
+POST http://localhost:5000/api/tasks
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": ""
+}
+
+### Create task with unknown field (expect 400)
+POST http://localhost:5000/api/tasks
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Test",
+  "unknownField": "should fail"
+}
+
+### Get all tasks
+GET http://localhost:5000/api/tasks
+Authorization: Bearer {{authToken}}
+
+### Get task by ID (replace with actual ID)
+@taskId = <replace_with_task_id>
+GET http://localhost:5000/api/tasks/{{taskId}}
+Authorization: Bearer {{authToken}}
+
+### Get task with invalid UUID (expect 400)
+GET http://localhost:5000/api/tasks/not-a-uuid
+Authorization: Bearer {{authToken}}
+
+### Get task that does not exist (expect 404)
+GET http://localhost:5000/api/tasks/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{authToken}}
+
+### Update task (replace with actual ID)
+PATCH http://localhost:5000/api/tasks/{{taskId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Updated project report",
+  "isCompleted": true
+}
+
+### Update task with empty body (expect 400)
+PATCH http://localhost:5000/api/tasks/{{taskId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{}
+
+### Update task with unknown field (expect 400)
+PATCH http://localhost:5000/api/tasks/{{taskId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Test",
+  "unknownField": "should fail"
+}
+
+### Delete task (replace with actual ID)
+DELETE http://localhost:5000/api/tasks/{{taskId}}
+Authorization: Bearer {{authToken}}
+
+### Delete task that does not exist (expect 404)
+DELETE http://localhost:5000/api/tasks/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{authToken}}
+
+### AUTH GUARD TESTS ###
+
+### Access tasks without token (expect 401)
+GET http://localhost:5000/api/tasks
+
+### Access tasks with invalid token (expect 401)
+GET http://localhost:5000/api/tasks
+Authorization: Bearer invalid_token_here
+
+### CROSS-OWNERSHIP TESTS ###
+### These require two valid tokens from two different users.
+### Run these after getting a task ID from user 1.
+
+### Try to access user 1's task as user 2 (expect 403)
+### Replace {{user2Token}} and {{user1TaskId}}
+@user2Token = <user2_jwt_token>
+@user1TaskId = <task_id_belonging_to_user1>
+GET http://localhost:5000/api/tasks/{{user1TaskId}}
+Authorization: Bearer {{user2Token}}
+
+### Try to update user 1's task as user 2 (expect 403)
+PATCH http://localhost:5000/api/tasks/{{user1TaskId}}
+Content-Type: application/json
+Authorization: Bearer {{user2Token}}
+
+{
+  "title": "Hacked!"
+}
+
+### Try to delete user 1's task as user 2 (expect 403)
+DELETE http://localhost:5000/api/tasks/{{user1TaskId}}
+Authorization: Bearer {{user2Token}}
