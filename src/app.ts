@@ -8,10 +8,11 @@ import { AppError } from "./utils/AppError";
 
 const app: Application = express();
 
+app.set("trust proxy", 1);
 app.use(helmet());
 app.use(cors({ methods: ["GET", "POST", "PATCH", "DELETE"] }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
 app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "ok" });

@@ -19,18 +19,17 @@ FROM base AS runtime
 
 ENV NODE_ENV=production
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-RUN chown -R appuser:appgroup /app
-USER appuser
+RUN chown -R node:node /app
+USER node
 
-COPY --chown=appuser:appgroup package.json pnpm-lock.yaml ./
+COPY --chown=node:node package.json pnpm-lock.yaml ./
 RUN pnpm install --prod --shamefully-hoist --ignore-scripts
 
-COPY --chown=appuser:appgroup prisma.config.ts ./prisma.config.ts
-COPY --chown=appuser:appgroup docker-entrypoint.sh ./docker-entrypoint.sh
-COPY --from=build --chown=appuser:appgroup /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build --chown=appuser:appgroup /app/dist ./dist
-COPY --from=build --chown=appuser:appgroup /app/prisma ./prisma
+COPY --chown=node:node prisma.config.ts ./prisma.config.ts
+COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
+COPY --from=build --chown=node:node /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build --chown=node:node /app/dist ./dist
+COPY --from=build --chown=node:node /app/prisma ./prisma
 
 RUN chmod +x ./docker-entrypoint.sh
 
