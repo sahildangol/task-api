@@ -2,7 +2,7 @@ import app from "./app";
 import { config } from "./config/env";
 import prisma from "./config/db";
 
-const PORT = config.port || 5000;
+const PORT = config.port || 5001;
 
 const server = app.listen(PORT, () => {
   console.log(`Server is Running on Port ${PORT}`);

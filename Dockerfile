@@ -33,6 +33,6 @@ COPY --from=build --chown=node:node /app/prisma ./prisma
 
 RUN chmod +x ./docker-entrypoint.sh
 
-EXPOSE 5000
+EXPOSE 5001
 
 CMD ["./docker-entrypoint.sh"]

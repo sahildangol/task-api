@@ -45,7 +45,7 @@ This is the primary way to run the application for production or review.
 
 3. **Verify**
    Check that the server is alive and well:
-   http://localhost:5000/health
+   http://localhost:5001/health
 
 ### Local Development
 For active coding with hot-reload and local database connections.
@@ -79,7 +79,7 @@ For active coding with hot-reload and local database connections.
 
 ## API Reference
 
-Base URL: `http://localhost:5000`
+Base URL: `http://localhost:5001`
 
 ### Authentication
 

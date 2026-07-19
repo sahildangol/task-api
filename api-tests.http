@@ -1,7 +1,7 @@
 ### AUTHENTICATION ###
 
 ### Register a new user
-POST http://localhost:5000/api/auth/register
+POST http://localhost:5001/api/auth/register
 Content-Type: application/json
 
 {
@@ -11,7 +11,7 @@ Content-Type: application/json
 }
 
 ### Register with duplicate email (expect 409)
-POST http://localhost:5000/api/auth/register
+POST http://localhost:5001/api/auth/register
 Content-Type: application/json
 
 {
@@ -21,7 +21,7 @@ Content-Type: application/json
 }
 
 ### Register with missing name (expect 400)
-POST http://localhost:5000/api/auth/register
+POST http://localhost:5001/api/auth/register
 Content-Type: application/json
 
 {
@@ -30,7 +30,7 @@ Content-Type: application/json
 }
 
 ### Login
-POST http://localhost:5000/api/auth/login
+POST http://localhost:5001/api/auth/login
 Content-Type: application/json
 
 {
@@ -39,7 +39,7 @@ Content-Type: application/json
 }
 
 ### Login wrong password (expect 401)
-POST http://localhost:5000/api/auth/login
+POST http://localhost:5001/api/auth/login
 Content-Type: application/json
 
 {
@@ -48,13 +48,13 @@ Content-Type: application/json
 }
 
 ### Login with missing fields (expect 400)
-POST http://localhost:5000/api/auth/login
+POST http://localhost:5001/api/auth/login
 Content-Type: application/json
 
 {}
 
 ### Create a second user (for cross-user tests)
-POST http://localhost:5000/api/auth/register
+POST http://localhost:5001/api/auth/register
 Content-Type: application/json
 
 {
@@ -64,7 +64,7 @@ Content-Type: application/json
 }
 
 ### Login as second user
-POST http://localhost:5000/api/auth/login
+POST http://localhost:5001/api/auth/login
 Content-Type: application/json
 
 {
@@ -83,7 +83,7 @@ Content-Type: application/json
 @authToken = <your_jwt_token_here>
 
 ### Create a task
-POST http://localhost:5000/api/tasks
+POST http://localhost:5001/api/tasks
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -93,7 +93,7 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Create task without description
-POST http://localhost:5000/api/tasks
+POST http://localhost:5001/api/tasks
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -102,7 +102,7 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Create task with empty title (expect 400)
-POST http://localhost:5000/api/tasks
+POST http://localhost:5001/api/tasks
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -111,7 +111,7 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Create task with unknown field (expect 400)
-POST http://localhost:5000/api/tasks
+POST http://localhost:5001/api/tasks
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -121,24 +121,24 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Get all tasks
-GET http://localhost:5000/api/tasks
+GET http://localhost:5001/api/tasks
 Authorization: Bearer {{authToken}}
 
 ### Get task by ID (replace with actual ID)
 @taskId = <replace_with_task_id>
-GET http://localhost:5000/api/tasks/{{taskId}}
+GET http://localhost:5001/api/tasks/{{taskId}}
 Authorization: Bearer {{authToken}}
 
 ### Get task with invalid UUID (expect 400)
-GET http://localhost:5000/api/tasks/not-a-uuid
+GET http://localhost:5001/api/tasks/not-a-uuid
 Authorization: Bearer {{authToken}}
 
 ### Get task that does not exist (expect 404)
-GET http://localhost:5000/api/tasks/00000000-0000-0000-0000-000000000000
+GET http://localhost:5001/api/tasks/00000000-0000-0000-0000-000000000000
 Authorization: Bearer {{authToken}}
 
 ### Update task (replace with actual ID)
-PATCH http://localhost:5000/api/tasks/{{taskId}}
+PATCH http://localhost:5001/api/tasks/{{taskId}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -148,14 +148,14 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Update task with empty body (expect 400)
-PATCH http://localhost:5000/api/tasks/{{taskId}}
+PATCH http://localhost:5001/api/tasks/{{taskId}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {}
 
 ### Update task with unknown field (expect 400)
-PATCH http://localhost:5000/api/tasks/{{taskId}}
+PATCH http://localhost:5001/api/tasks/{{taskId}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -165,20 +165,20 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Delete task (replace with actual ID)
-DELETE http://localhost:5000/api/tasks/{{taskId}}
+DELETE http://localhost:5001/api/tasks/{{taskId}}
 Authorization: Bearer {{authToken}}
 
 ### Delete task that does not exist (expect 404)
-DELETE http://localhost:5000/api/tasks/00000000-0000-0000-0000-000000000000
+DELETE http://localhost:5001/api/tasks/00000000-0000-0000-0000-000000000000
 Authorization: Bearer {{authToken}}
 
 ### AUTH GUARD TESTS ###
 
 ### Access tasks without token (expect 401)
-GET http://localhost:5000/api/tasks
+GET http://localhost:5001/api/tasks
 
 ### Access tasks with invalid token (expect 401)
-GET http://localhost:5000/api/tasks
+GET http://localhost:5001/api/tasks
 Authorization: Bearer invalid_token_here
 
 ### CROSS-OWNERSHIP TESTS ###
@@ -189,11 +189,11 @@ Authorization: Bearer invalid_token_here
 ### Replace {{user2Token}} and {{user1TaskId}}
 @user2Token = <user2_jwt_token>
 @user1TaskId = <task_id_belonging_to_user1>
-GET http://localhost:5000/api/tasks/{{user1TaskId}}
+GET http://localhost:5001/api/tasks/{{user1TaskId}}
 Authorization: Bearer {{user2Token}}
 
 ### Try to update user 1's task as user 2 (expect 403)
-PATCH http://localhost:5000/api/tasks/{{user1TaskId}}
+PATCH http://localhost:5001/api/tasks/{{user1TaskId}}
 Content-Type: application/json
 Authorization: Bearer {{user2Token}}
 
@@ -202,5 +202,5 @@ Authorization: Bearer {{user2Token}}
 }
 
 ### Try to delete user 1's task as user 2 (expect 403)
-DELETE http://localhost:5000/api/tasks/{{user1TaskId}}
+DELETE http://localhost:5001/api/tasks/{{user1TaskId}}
 Authorization: Bearer {{user2Token}}
