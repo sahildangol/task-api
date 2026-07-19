@@ -9,7 +9,6 @@ const publicUserSelect = {
   id: true,
   email: true,
   name: true,
-  role: true,
   createdAt: true,
 } satisfies Prisma.UserSelect;
 
@@ -83,7 +82,6 @@ export class AuthService {
     const payload = {
       id: user.id,
       email: user.email,
-      role: user.role,
     };
 
     const token: string = jwt.sign(payload, config.jwtSecret, {

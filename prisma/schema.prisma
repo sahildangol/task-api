@@ -17,7 +17,6 @@ model User {
   email     String   @unique
   password  String
   name      String
-  role      String   @default("USER")
   tasks     Task[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

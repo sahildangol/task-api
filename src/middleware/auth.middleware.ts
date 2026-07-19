@@ -6,7 +6,6 @@ import { AppError } from "../utils/AppError";
 type AuthTokenPayload = {
   id: string;
   email: string;
-  role: string;
 };
 
 export const protect = (req: Request, _res: Response, next: NextFunction) => {
@@ -29,16 +28,15 @@ export const protect = (req: Request, _res: Response, next: NextFunction) => {
       throw new AppError("Invalid authorization token", 401);
     }
 
-    const { id, email, role } = decoded as Partial<AuthTokenPayload>;
+    const { id, email } = decoded as Partial<AuthTokenPayload>;
 
-    if (typeof id !== "string" || typeof email !== "string" || typeof role !== "string") {
+    if (typeof id !== "string" || typeof email !== "string") {
       throw new AppError("Invalid authorization token", 401);
     }
 
     req.user = {
       id,
       email,
-      role,
     };
 
     next();

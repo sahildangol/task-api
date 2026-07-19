@@ -45,7 +45,6 @@ const seed = async () => {
       email: "admin@example.com",
       name: "Admin",
       password: hashedPassword,
-      role: "USER",
     },
   });
 
