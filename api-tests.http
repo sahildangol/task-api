@@ -1,3 +1,8 @@
+### HEALTH CHECK ###
+
+### Health check
+GET http://localhost:5001/health
+
 ### AUTHENTICATION ###
 
 ### Register a new user
@@ -29,6 +34,37 @@ Content-Type: application/json
   "password": "password123"
 }
 
+### Register with short password (expect 400)
+POST http://localhost:5001/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "short@example.com",
+  "password": "123",
+  "name": "Short"
+}
+
+### Register with unknown field (expect 400)
+POST http://localhost:5001/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "name": "Test",
+  "role": "admin"
+}
+
+### Register with invalid email (expect 400)
+POST http://localhost:5001/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": "password123",
+  "name": "Bad Email"
+}
+
 ### Login
 POST http://localhost:5001/api/auth/login
 Content-Type: application/json
@@ -45,6 +81,15 @@ Content-Type: application/json
 {
   "email": "john@example.com",
   "password": "wrongpassword"
+}
+
+### Login non-existent email (expect 401)
+POST http://localhost:5001/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "nonexistent@example.com",
+  "password": "password123"
 }
 
 ### Login with missing fields (expect 400)

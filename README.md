@@ -41,11 +41,13 @@ This is the primary way to run the application for production or review.
    ```bash
    docker compose up -d --build
    ```
-   *This command will automatically spin up PostgreSQL, wait for it to become healthy, run database migrations, seed the database, and start the compiled API.*
+   *Spins up PostgreSQL, runs migrations, seeds the DB, and starts the API.*
 
 3. **Verify**
-   Check that the server is alive and well:
-   http://localhost:5001/health
+   ```bash
+   curl http://localhost:5001/health
+   # {"status":"ok"}
+   ```
 
 ### Local Development
 For active coding with hot-reload and local database connections.
@@ -59,7 +61,7 @@ For active coding with hot-reload and local database connections.
    ```bash
    cp .env.sample .env
    ```
-   *Create a `.env` file (or copy `.env.sample`) and set the database host (use `localhost` for local dev, `db` inside Docker) and your password.*
+   *Edit `.env` — set `DB_HOST=localhost` when running locally, keep `DB_HOST=db` for Docker.*
 
 3. **Start Local PostgreSQL**
    ```bash
@@ -81,6 +83,12 @@ For active coding with hot-reload and local database connections.
 
 Base URL: `http://localhost:5001`
 
+### Health Check
+
+| Endpoint  | Method | Description                  | Auth Required |
+| --------- | ------ | ---------------------------- | ------------- |
+| `/health` | GET    | Lightweight liveness probe   | No            |
+
 ### Authentication
 
 | Endpoint       | Method | Description          | Auth Required |
@@ -99,7 +107,7 @@ Base URL: `http://localhost:5001`
 }
 ```
 
-**Responses:** `201 Created` on success, `409 Conflict` on duplicate email, `400 Bad Request` on validation errors.
+**Responses:** `201 Created` on success, `409 Conflict` on duplicate email, `400 Bad Request` on validation errors (missing fields, short password, unknown keys, invalid email).
 
 #### POST `/api/auth/login`
 
@@ -111,7 +119,7 @@ Base URL: `http://localhost:5001`
 }
 ```
 
-**Responses:** `200 OK` on success (returns JWT token), `401 Unauthorized` on invalid credentials.
+**Responses:** `200 OK` on success (returns JWT + user), `401 Unauthorized` on invalid credentials or non-existent email.
 
 ### Tasks (All task endpoints require `Authorization: Bearer <token>`)
 
@@ -145,7 +153,7 @@ Base URL: `http://localhost:5001`
 
 ### Error Response Format
 
-All errors return:
+All errors follow a consistent shape:
 ```json
 {
   "success": false,
@@ -154,6 +162,34 @@ All errors return:
   }
 }
 ```
+
+In development mode (`NODE_ENV=development`), a `stack` field is also included.
+
+### Rate Limiting
+
+Authentication endpoints (`/api/auth/*`) are rate-limited to **10 requests per 15-minute window** per IP. Exceeding the limit returns a `429` response:
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Too many requests from this IP, please try again after 15 minutes"
+  }
+}
+```
+
+## Security
+
+- **Helmet** — sets secure HTTP headers (`X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`, etc.)
+- **CORS** — restricted to `GET`, `POST`, `PATCH`, `DELETE` methods
+- **Request size limit** — JSON and URL-encoded bodies are capped at **10 KB**
+- **Trust proxy** — `app.set('trust proxy', 1)` for correct IP behind reverse proxies
+- **Rate limiting** — auth endpoints protected from brute-force (see above)
+
+## Server & Process Management
+
+- **Graceful shutdown** — the server listens for `SIGTERM` and `SIGINT`, closes the HTTP server, disconnects Prisma, and exits cleanly. Docker `stop` / `down` sends `SIGTERM`.
+- **Safety nets** — unhandled promise rejections and uncaught exceptions trigger a clean `process.exit(1)` to avoid undefined state.
+- **Database URL** — composed at runtime from `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, and `DB_NAME`; set via `.env` or Docker Compose `environment`.
 
 ## Migration Workflow
 
