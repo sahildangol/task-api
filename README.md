@@ -59,7 +59,7 @@ For active coding with hot-reload and local database connections.
    ```bash
    cp .env.sample .env
    ```
-   *Edit `.env` and ensure `DATABASE_URL` is pointing to `localhost` (e.g. `postgresql://postgres:your_db_password@localhost:5432/task_manager_db`).*
+   *Create a `.env` file (or copy `.env.sample`) and set the database host (use `localhost` for local dev, `db` inside Docker) and your password.*
 
 3. **Start Local PostgreSQL**
    ```bash
